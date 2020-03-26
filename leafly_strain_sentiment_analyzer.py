@@ -60,6 +60,23 @@ def open_file(file_path):
 #this helper function will be used to grab the strain names, strain pages, etc lists from leafly. it should return at least one list of strain pages
 def scrape_list_of_strains():
 
+    #since this is more of a bespoke project and not really intended to be agnostic, i dont see a big point in trying to load a bunch of
+    # datafiles in here, so yes i am going to _hard code_ some links and stuff in this helper
+
+    #like always, gotta make a save file when doing stuff over network (you know the drill by now if youre reading this)
+    savefile = open('list_of_strain_pages.txt', 'w')
+
+    #now we bring in the webdriver, NOTE: I am using the version 80.blah driver because i have version 80 on chrome, if you get an error 
+    # on this next line it is probably because you have the wrong chromedriver for your chrome version. you can find your chrome version in the settings menu, and download a new driver from https://chromedriver.chromium.org/downloads
+    driver = webdriver.Chrome('./Chrome/chromedriver')
+
+    #setting up a small (maybe not so small at the end) list for holding strain pages (these pages are going to be the views for a list of strains, 
+    # not the individual strain-pages, sorry if the wording is confusing here). to cut down on a little bit of space I am also adding a prefix that will be used later
+    site_prefix = "leafly.com"
+    list_of_strain_pages = []
+    #this is where some research kicks in from last night (25th) - I know that the pages all follow the pattern: 'leafly.com/strains?sort=name&page=X
+
+
     return
 
 def add_senti_analysis(review_obj):
