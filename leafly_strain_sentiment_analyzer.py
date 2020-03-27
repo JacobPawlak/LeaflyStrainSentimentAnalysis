@@ -66,20 +66,6 @@ def scrape_list_of_strains():
     #like always, gotta make a save file when doing stuff over network (you know the drill by now if youre reading this)
     savefile = open('list_of_strain_pages.txt', 'w')
 
-    '''
-    #setting up a small (maybe not so small at the end) list for holding strain pages (these pages are going to be the views for a list of strains, 
-    # not the individual strain-pages, sorry if the wording is confusing here). to cut down on a little bit of space I am also adding a prefix that will be used later
-    site_prefix = "https://leafly.com"
-    list_of_strain_pages = []
-    #this is where some research kicks in from last night (25th) - I know that the pages all follow the pattern: 'leafly.com/strains?sort=name&page=X' when sorting by name (the only way to get consitant results)
-    # it looks like it will lend itself to an easy list comprehension:
-    [list_of_strain_pages.append('/strains?sort=name&page={}'.format(page_num)) for page_num in range(1, 115)]
-    
-    #here is where we gotta add a few counters and extras, we'll fill this out as needed
-    strain_counter = 0
-    list_of_strain_names = []
-    '''
-
     #okay so after some testing it turns out that the webdriver wont let me do the sort by name thing so im just going to have to start on a page and click the next button over and over
     #setting up some new prefixes and stuff
     site_prefix = "https://leafly.com/strains"
@@ -100,22 +86,51 @@ def scrape_list_of_strains():
     [savefile.write("{}\n".format(str(strain['href']))) for strain in strain_links]
     
     #we can move on to the next page since we are done
-    next_btn = driver.find_element_by_link_text("Next")
-    next_btn.click()
 
+    next_links = driver.find_elements_by_css_selector("a.flex.items-center.pl-sm")
+    print(next_links)
+    print(len(next_links))
+    next_links[-1].click()
+
+
+#    next_btn = driver.find_element_by_link_text("Next")
+#    next_btn.click()
+    time.sleep(3)
     #now to lazily loop through all of the rest of the pages, then we can do the same thing as above
-    curr_page_number = driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[4]/span').text.split()
+    #curr_page_number = driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[4]/span').text.split()
     #the curr_page_number should look like the '1 of 114' text at the bottom of the page. i am interested in the two numbers
+    #print("Page {} has been scraped".format(curr_page_number[0]))
 
-    while(int(curr_page_number[0]) < int(curr_page_number[2])):
-        #like i said, we just have to do it all again
-        time.sleep(3)
+    for i in range(0, 113):
+    #while(int(curr_page_number[0]) < int(curr_page_number[2])):
+        #like i said, we just have to do it all again...
+        #let the page load for a sec
+        #grab the page source to parse through
+        print("Scraping page {}".format(str(i+2)))
         soup = BeautifulSoup(driver.page_source, 'html5lib')
+        #find all the strain tiles
         strain_links = soup.find_all('a', attrs={'class': 'strain-tile'})
+        #add to the strain_names list 
         [list_of_strain_names.append(strain['href']) for strain in strain_links]
+        #write out to our save file for safe keeping
         [savefile.write("{}\n".format(str(strain['href']))) for strain in strain_links]
-        next_btn = driver.find_element_by_link_text("Next")
-        next_btn.click()
+        #find and click the next page button
+
+        next_links = driver.find_elements_by_css_selector("a.flex.items-center.pl-sm")
+        print(next_links)
+        print(len(next_links))
+        next_links[-1].click()
+
+        #next_btn = driver.find_element_by_link_text("Next")
+        #next_btn.click()
+        time.sleep(3)
+        #find the current page number again for the sentinel 
+        #curr_page_number = driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[4]/span').text.split()
+        #print("Page {} has been scraped".format(curr_page_number[0]))
+
+    print("Found {} of strains!".format(len(list_of_strain_names)))
+
+    #now that we are done grabbing all of the names, it is time to start making our strain dicts and loading them up with data
 
     return
 
@@ -131,6 +146,7 @@ def build_dashboard():
 
 def main():
 
-    print()
+    print("Starting...")
+    scrape_list_of_strains()
 
 main()
