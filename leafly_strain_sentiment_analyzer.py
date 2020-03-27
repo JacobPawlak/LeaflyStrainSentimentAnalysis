@@ -98,6 +98,24 @@ def scrape_list_of_strains():
     strain_links = soup.find_all('a', attrs={'class': 'strain-tile'})
     [list_of_strain_names.append(strain['href']) for strain in strain_links]
     [savefile.write("{}\n".format(str(strain['href']))) for strain in strain_links]
+    
+    #we can move on to the next page since we are done
+    next_btn = driver.find_element_by_link_text("Next")
+    next_btn.click()
+
+    #now to lazily loop through all of the rest of the pages, then we can do the same thing as above
+    curr_page_number = driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[4]/span').text.split()
+    #the curr_page_number should look like the '1 of 114' text at the bottom of the page. i am interested in the two numbers
+
+    while(int(curr_page_number[0]) < int(curr_page_number[2])):
+        #like i said, we just have to do it all again
+        time.sleep(3)
+        soup = BeautifulSoup(driver.page_source, 'html5lib')
+        strain_links = soup.find_all('a', attrs={'class': 'strain-tile'})
+        [list_of_strain_names.append(strain['href']) for strain in strain_links]
+        [savefile.write("{}\n".format(str(strain['href']))) for strain in strain_links]
+        next_btn = driver.find_element_by_link_text("Next")
+        next_btn.click()
 
     return
 
