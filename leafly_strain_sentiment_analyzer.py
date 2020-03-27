@@ -66,16 +66,38 @@ def scrape_list_of_strains():
     #like always, gotta make a save file when doing stuff over network (you know the drill by now if youre reading this)
     savefile = open('list_of_strain_pages.txt', 'w')
 
-    #now we bring in the webdriver, NOTE: I am using the version 80.blah driver because i have version 80 on chrome, if you get an error 
-    # on this next line it is probably because you have the wrong chromedriver for your chrome version. you can find your chrome version in the settings menu, and download a new driver from https://chromedriver.chromium.org/downloads
-    driver = webdriver.Chrome('./Chrome/chromedriver')
-
+    '''
     #setting up a small (maybe not so small at the end) list for holding strain pages (these pages are going to be the views for a list of strains, 
     # not the individual strain-pages, sorry if the wording is confusing here). to cut down on a little bit of space I am also adding a prefix that will be used later
-    site_prefix = "leafly.com"
+    site_prefix = "https://leafly.com"
     list_of_strain_pages = []
-    #this is where some research kicks in from last night (25th) - I know that the pages all follow the pattern: 'leafly.com/strains?sort=name&page=X
+    #this is where some research kicks in from last night (25th) - I know that the pages all follow the pattern: 'leafly.com/strains?sort=name&page=X' when sorting by name (the only way to get consitant results)
+    # it looks like it will lend itself to an easy list comprehension:
+    [list_of_strain_pages.append('/strains?sort=name&page={}'.format(page_num)) for page_num in range(1, 115)]
+    
+    #here is where we gotta add a few counters and extras, we'll fill this out as needed
+    strain_counter = 0
+    list_of_strain_names = []
+    '''
 
+    #okay so after some testing it turns out that the webdriver wont let me do the sort by name thing so im just going to have to start on a page and click the next button over and over
+    #setting up some new prefixes and stuff
+    site_prefix = "https://leafly.com/strains"
+    list_of_strain_names = []
+    strain_counter = 0
+
+    #now we bring in the webdriver, NOTE: I am using the version 80.blah driver because i have version 80 on chrome, if you get an error 
+    # on this next line it is probably because you have the wrong chromedriver for your chrome version. you can find your chrome version in the settings menu, and download a new driver from https://chromedriver.chromium.org/downloads
+    print("It is my experience that you will need to click the \"I am over 21\" button in the popup before you can proceed to the site. Sleeping for 10 seconds after you see this.")
+    driver = webdriver.Chrome('./Chrome/chromedriver')
+    driver.get(site_prefix)
+    time.sleep(10)
+    #now to grab the page source and pull the strain links out of it. we can use the find_all to look for the <a> tags and then pull the href out of them
+    # we can also take this time to write out to our savefile
+    soup = BeautifulSoup(driver.page_source, 'html5lib')
+    strain_links = soup.find_all('a', attrs={'class': 'strain-tile'})
+    [list_of_strain_names.append(strain['href']) for strain in strain_links]
+    [savefile.write("{}\n".format(str(strain['href']))) for strain in strain_links]
 
     return
 
