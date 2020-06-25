@@ -88,18 +88,11 @@ def scrape_list_of_strains():
     #we can move on to the next page since we are done
 
     next_links = driver.find_elements_by_css_selector("a.flex.items-center.pl-sm")
-    print(next_links)
-    print(len(next_links))
+    #print(next_links)
+    #print(len(next_links))
     next_links[-1].click()
 
-
-#    next_btn = driver.find_element_by_link_text("Next")
-#    next_btn.click()
     time.sleep(3)
-    #now to lazily loop through all of the rest of the pages, then we can do the same thing as above
-    #curr_page_number = driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[4]/span').text.split()
-    #the curr_page_number should look like the '1 of 114' text at the bottom of the page. i am interested in the two numbers
-    #print("Page {} has been scraped".format(curr_page_number[0]))
 
     for i in range(0, 113):
     #while(int(curr_page_number[0]) < int(curr_page_number[2])):
@@ -117,20 +110,20 @@ def scrape_list_of_strains():
         #find and click the next page button
 
         next_links = driver.find_elements_by_css_selector("a.flex.items-center.pl-sm")
-        print(next_links)
-        print(len(next_links))
+        #print(next_links)
+        #print(len(next_links))
         next_links[-1].click()
 
-        #next_btn = driver.find_element_by_link_text("Next")
-        #next_btn.click()
         time.sleep(3)
-        #find the current page number again for the sentinel 
-        #curr_page_number = driver.find_element_by_xpath('//*[@id="__next"]/div[2]/div[4]/span').text.split()
-        #print("Page {} has been scraped".format(curr_page_number[0]))
 
     print("Found {} of strains!".format(len(list_of_strain_names)))
 
+    driver.quit()
     #now that we are done grabbing all of the names, it is time to start making our strain dicts and loading them up with data
+
+    return list_of_strain_names
+
+def collect_reviews(review_links):
 
     return
 
@@ -138,7 +131,7 @@ def add_senti_analysis(review_obj):
 
     return
 
-#todo: use streamlit maybe (or just export it and figure out how to use powerbi/tableu(sp) i guess)
+#todo: use streamlit maybe (or just export it and figure out how to use powerbi i guess)
 def build_dashboard():
     return
 
@@ -147,6 +140,11 @@ def build_dashboard():
 def main():
 
     print("Starting...")
-    scrape_list_of_strains()
+
+    list_of_strain_names = scrape_list_of_strains()
+
+    review_links = ["https://leafly.com{}/reviews".format(strain) for strain in list_of_strain_names]
+
+    collect_reviews(review_links)
 
 main()
